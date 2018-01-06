@@ -1,4 +1,4 @@
-function photovs(img_original,depth_app,lambda, mu, pos_sub, pos_pub ,img_sub, model_id, camK)
+function photovs(img_original,depth_app,lambda, mu, pos_sub, pos_pub ,img_sub, model_id, camK,  stop_velocity , max_iterations , stop_error)
 
     msg = rosmessage(pos_pub);
     msg.ModelName = 'vi_sensor';
@@ -46,9 +46,14 @@ function photovs(img_original,depth_app,lambda, mu, pos_sub, pos_pub ,img_sub, m
         subplot(2,2,1),imagesc(img);title('Image');axis([0 640 0 480]);
         subplot(2,2,2),imagesc(img_original);title('Desired image');axis([0 640 0 480])
     
-%         normeError=norm(error)
+        normeError=norm(error)
 %         if(normeError < 1 || iter > 2000) break;end
 %         if(norm(vc) < 0.0001 ) break;end
+
+        if(normeError < stop_error || iter > max_iterations) break;end
+        
+        if(norm(vc) < stop_velocity ) break;end
+        
         normv_arr(iter)=norm(vc);
         subplot(2,2,3),plot(normv_arr);title('Velocity');
         err_arr(iter)=norm(error);    
@@ -60,7 +65,7 @@ function photovs(img_original,depth_app,lambda, mu, pos_sub, pos_pub ,img_sub, m
      
         fprintf('v:%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,|Tc|=%f\n',vc(1),vc(2),vc(3),vc(4),vc(5),vc(6),sum(vc.*vc));     
         dt = 1;
-        send_velocity_sensor(pos_sub, pos_pub , vc ,msg, model_id,dt)
+        send_velocity_sensor(pos_sub, pos_pub , vc ,msg, model_id,dt, false)
 
         pause(0.1);
     end

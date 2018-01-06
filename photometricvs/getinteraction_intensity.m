@@ -42,6 +42,7 @@ for i=bord+1:size(imgd,1)-bord %i is row
         
         Gx = (2047.0 *(imgd(i,j+1) - imgd(i,j-1))+913.0 *(imgd(i,j+2) - imgd(i,j-2))+112.0 *(imgd(i,j+3) - imgd(i,j-3)))/8418.0;
         Gy = (2047.0 *(imgd(i+1,j) - imgd(i-1,j))+913.0 *(imgd(i+2,j) - imgd(i-2,j))+112.0 *(imgd(i+3,j) - imgd(i-3,j)))/8418.0;
+        
         Gx_arr(i,j)=Gx;
         Gy_arr(i,j)=Gy;
         

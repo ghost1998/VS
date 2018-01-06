@@ -26,17 +26,17 @@ model_id = find(strcmp(pos.Name,'vi_sensor'));
 cam.K=[205.46963709898583, 0.0, 320.5; 0.0, 205.46963709898583, 240.5; 0.0, 0.0, 1.0];
 
 
+dt=1;
 
-
-dr = [4 1 1  0 -pi/2  0];
-send_pose_sensor(pos_sub, pos_pub , dr ,msg, model_id)
+vc = [4 1 1  0 -pi/2  0];
+send_velocity_sensor(pos_sub, pos_pub , vc ,msg, model_id,dt , true)
 pause(0.1)
 img=readImage(receive(img_sub));
 img_original = img;
 
 
-dr = [4 0 0  0 -pi/2  0];
-send_pose_sensor(pos_sub, pos_pub , dr ,msg, model_id)
+vc = [4 0 0  0 -pi/2  0];
+send_velocity_sensor(pos_sub, pos_pub , vc ,msg, model_id,dt , true)
 pause(0.1)
 img=readImage(receive(img_sub));
 
@@ -49,4 +49,8 @@ lambda   = 0.7;
 depth_app = 4;
 mu =  0.1;
 
-photovs(img_original,depth_app,lambda,mu, pos_sub, pos_pub ,img_sub, model_id, cam.K)
+stop_velocity = 0.0001;
+max_iterations = 1000;
+stop_error = 0.00001;
+
+photovs(img_original,depth_app,lambda,mu, pos_sub, pos_pub ,img_sub, model_id, cam.K,  stop_velocity , max_iterations , stop_error)

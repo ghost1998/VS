@@ -1,8 +1,8 @@
-addpath(genpath('../utils'))
-
 clear
 clc
-% roslaunch rotors_gazebo vi_sensor.launch
+
+addpath(genpath('../utils'))
+
 try
     rosinit;
 end
@@ -26,30 +26,51 @@ model_id = find(strcmp(pos.Name,'vi_sensor'));
 cam.K=[205.46963709898583, 0.0, 320.5; 0.0, 205.46963709898583, 240.5; 0.0, 0.0, 1.0];
 
 
-dt =1;
+R_axis_change= [0 ,-1, 0; 0, 0, -1; 1, 0, 0 ];
 
-vc = [4 1 1  0.2 -pi/2  0.3];
+
+dt =1;
+vc = [4 1 1  0 -pi/2  0];
 send_velocity_sensor(pos_sub, pos_pub , vc ,msg, model_id,dt , true)
+% dr = [4 1 1  0 0  0];
+% send_pose_sensor(pos_sub, pos_pub , dr ,msg, model_id)
 pause(0.1)
 img=readImage(receive(img_sub));
 img_original = img;
 
 
-vc = [4 0 0  0 -pi/2  0];
+Pose_matrix = get_sensor_pose(pos_sub, pos_pub, model_id);
+% send_pose_sensor_from_matrix(Pose_matrix, pos_sub, pos_pub, msg,  model_id);
+p_desired = Pose_matrix;
+% Store this pose as p_desired
+
+
+
+% dr = [4 0 0  0 -pi/2  0];
+
+vc = [4 0 0  0 0  0];
 send_velocity_sensor(pos_sub, pos_pub , vc ,msg, model_id,dt , true)
+% send_pose_sensor(pos_sub, pos_pub , dr ,msg, model_id)
 pause(0.1)
 img=readImage(receive(img_sub));
+Pose_matrix = get_sensor_pose(pos_sub, pos_pub, model_id);
+p1 = Pose_matrix;
+% Store this pose as p1
+
+
+%Make relative stransformation R from p1 and p2
+
 
 
 imgg = rgb2gray(img);
 img_originalg = rgb2gray(img_original);
 
 
-lambda   = 0.0001;
-depth_app = 4;
 
+lambda   = 0.1;
+iter=1;
 stop_velocity = 0.0001;
 max_iterations = 1000;
 stop_error = 0.00001;
 
-ibvs(img_original,depth_app,lambda, pos_sub, pos_pub ,img_sub, model_id, cam.K, stop_velocity, max_iterations , stop_error)
+pbvs(p_desired ,img_original , lambda, pos_sub, pos_pub ,img_sub, model_id, stop_velocity , max_iterations , stop_error)
